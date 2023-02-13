@@ -1,1 +1,0 @@
-# gameteq-test-task
