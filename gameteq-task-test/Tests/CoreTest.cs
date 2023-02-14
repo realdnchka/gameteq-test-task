@@ -10,19 +10,14 @@ public class CoreTest
 {
     protected IWebDriver driver;
     private string _url = "https://test-task.gameteq.com/";
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    
+    [SetUp]
+    public void SetUp()
     {
         driver = new ChromeDriver();
         var options = new ChromeOptions();
         options.AddArgument("no-sandbox");
         driver.Manage().Timeouts().PageLoad.Add(System.TimeSpan.FromSeconds(30));
-    }
-    
-    [SetUp]
-    public void SetUp()
-    {
         driver.Navigate().GoToUrl(_url);
     }
 

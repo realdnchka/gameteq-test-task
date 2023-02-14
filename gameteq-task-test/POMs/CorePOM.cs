@@ -40,43 +40,29 @@ namespace gameteq_task_test.POMs
             }
         }
 
-        protected bool IsElementExist(By selector)
-        {
-            try
-            {
-                WaitForElementExist(selector);
-                return true;
-            }
-            catch (NoSuchElementException)
-            {
-                return false;
-            }
-            
-        }
-
         protected void Click(By selector)
         {
             WaitForLoader();
             WaitForElementExist(selector);
-            Driver.FindElement(selector).Click();
+            FindElement(selector).Click();
         }
 
         protected string GetText(By selector)
         {
             WaitForElementExist(selector);
-            return Driver.FindElement(selector).Text;
+            return FindElement(selector).Text;
         }
 
         protected void SetText(By selector, string text)
         {
             WaitForElementExist(selector);
-            Driver.FindElement(selector).SendKeys(text);
+            FindElement(selector).SendKeys(text);
         }
 
         protected void SelectOptionByText(By selector, string options)
         {
             WaitForElementExist(selector);
-            SelectElement el = new SelectElement(Driver.FindElement(selector));
+            SelectElement el = new SelectElement(FindElement(selector));
             el.SelectByText(options);
         }
 
@@ -100,9 +86,15 @@ namespace gameteq_task_test.POMs
 
         protected string GetTextThroughValue(By selector)
         {
-            var el = Driver.FindElement(selector);
+            var el = FindElement(selector);
             return (string)Executor.ExecuteScript("return arguments[0].value", el);
         }
+
+        protected bool IsSelected(By selector)
+        {
+            return FindElement(selector).Selected;
+        }
+        
         protected IList<IWebElement> FindElements(By selector)
         {
             WaitForElementExist(selector);

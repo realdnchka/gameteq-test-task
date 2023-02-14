@@ -8,10 +8,13 @@ namespace gameteq_task_test.POMs;
 public class OfferAddPOM : CorePOM
 {
     private AddEntityPOM addEntityPom;
-
+    public SegmentOfferPOM segmentOfferPom;
+    private List<SegmentOfferPOM> _segments = new();
     public OfferAddPOM(IWebDriver driver) : base(driver)
     {
         addEntityPom = new(driver);
+        segmentOfferPom = new(driver, "//app-form-segments");
+        _segments.Add(segmentOfferPom);
     }
 
     #region Selectors
@@ -29,7 +32,7 @@ public class OfferAddPOM : CorePOM
     private By saveButton = By.XPath("//button/span[contains(text(), 'Save')]");
     
     //Segments implementation
-    private By addSegmentButton = By.XPath("//button/span[text()=' Add segment ']");
+    private By addSegmentButton = By.XPath("//mat-card-title[contains(text(), 'Segments')]//span[contains(text(), 'Add')]");
     #endregion
 
     #region Methods
@@ -114,7 +117,49 @@ public class OfferAddPOM : CorePOM
     {
         return GetText(groupSelect);
     }
-    
+
+    public void AddSegmentGroup(SegmentOfferPOM segment)
+    {
+        _segments.Add(segment.AddGroupButtonClick());
+    }
+
+    public void FillWithSegmentDto(Segment segment, SegmentOfferPOM segmentPom)
+    {
+        int indexOfSegmentName = 0;
+        switch (segment.Statement)
+        {
+            case SegmentStatement.Or: 
+                segmentPom.OrButtonClick();
+                break;
+            default:
+                segmentPom.AndButtonClick();
+                break;
+        }
+
+        foreach (var name in segment.Name)
+        {
+            indexOfSegmentName++;
+            segmentPom.AddSegmentButton();
+            try
+            {
+                segmentPom.NameSegmentSelectByText(name, indexOfSegmentName);
+            }
+            catch (NoSuchElementException)
+            {
+                AddSegmentButtonClick();
+                addEntityPom.FillForm(name);
+                segmentPom.NameSegmentSelectByText(name, indexOfSegmentName);
+            }
+        }
+
+        foreach (var seg in segment.Segments)
+        {
+            var newSegmentPom = segmentPom.AddGroupButtonClick();
+            _segments.Add(newSegmentPom);
+            FillWithSegmentDto(seg, newSegmentPom);
+        }
+    }
+
     public void FillWithOfferDto(Offer offer)
     {
         NameInputSendKeys(offer.Name);
@@ -155,11 +200,37 @@ public class OfferAddPOM : CorePOM
             addEntityPom.FillForm(offer.Group);
             GroupSelectByText(offer.Group);
         }
-        
-        AddSegmentButtonClick();
-        SaveButtonClick();
     }
 
+    public Segment GetSegmentFromPage()
+    {
+        var segment = new Segment();
+        for(int i = 0; i < _segments.Count; i++)
+        {
+            segment.Name = _segments[i].GetNameSegmentSelect();
+            segment.Statement = _segments[i].GetStatement();
+            
+            if (_segments[i].NumberOfCreatedGroups == 0)
+            {
+                continue;
+            }
+
+            for (int j = 1; j <= _segments[i].NumberOfCreatedGroups; j++)
+            {
+                Segment newseg = new();
+                newseg.Name = _segments[i + j].GetNameSegmentSelect();
+                foreach (var name in newseg.Name)
+                {
+                    segment.Name.RemoveAt(segment.Name.Count - 1);
+                }
+                newseg.Statement = _segments[i + j].GetStatement();
+                segment.Segments.Add(newseg);
+            }
+        }
+
+        return segment;
+    }
+    
     public Offer GetOfferFromPage()
     {
         Offer offer = new();

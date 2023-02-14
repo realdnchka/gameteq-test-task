@@ -1,5 +1,4 @@
 using gameteq_task_test.Helpers;
-using Random = System.Random;
 
 namespace gameteq_task_test.DTOs;
 
