@@ -6,18 +6,24 @@ public class Segment
     public List<string> Name { get; set; } = new();
     public List<Segment> Segments { get; set; } = new();
 
+    public bool Equals(Segment other)
+    {
+        return Statement == other.Statement && 
+               Name.SequenceEqual(other.Name) && 
+               Segments.SequenceEqual(other.Segments);
+    }
+
     public override bool Equals(object? obj)
     {
-        if (obj == null || !(obj is Segment))
-        {
-            return false;
-        }
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Segment)obj);
+    }
 
-        Segment other = (Segment) obj;
-
-        return this.Statement == other.Statement
-               && this.Name.SequenceEqual(other.Name)
-               && this.Segments.SequenceEqual(other.Segments);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine((int)Statement, Name, Segments);
     }
 }
 

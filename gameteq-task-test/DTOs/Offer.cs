@@ -10,21 +10,27 @@ public class Offer
     public string Group { get; set; }
     public Segment Segment { get; set; } = new();
 
-    public override bool Equals(object obj)
+    public bool Equals(Offer other)
     {
-        if (obj == null || !(obj is Offer))
-        {
-            return false;
-        }
+        return ForTest == other.ForTest && 
+               Name == other.Name && 
+               Key == other.Key && 
+               Category == other.Category && 
+               Networks.SequenceEqual(other.Networks) && 
+               Group == other.Group && 
+               Segment.Equals(other.Segment);
+    }
 
-        Offer other = (Offer) obj;
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Offer)obj);
+    }
 
-        return this.ForTest == other.ForTest
-               && this.Name == other.Name
-               && this.Key == other.Key
-               && this.Category == other.Category
-               && this.Networks.SequenceEqual(other.Networks)
-               && this.Group == other.Group
-               && this.Segment.Equals(other.Segment);
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(ForTest, Name, Key, Category, Networks, Group, Segment);
     }
 }
